@@ -18,10 +18,16 @@ class PrettyPreview {
   private useMask: boolean = true
   private lazy: boolean = true
 
-  idx: number = -1
-  #visible: boolean = false
+  readonly viewportSize: [number, number] = [window.innerWidth, window.innerHeight]
+  imageSize: [number, number] = [0, 0]
+
+  #idx: number = -1
   #scalePercent: number = 100
+  defaultScalePercent: number = 50
   #showOriginalScale: boolean = false
+  #angle: number = 0
+
+  currentImage?: HTMLImageElement
 
   constructor (options: PrettyPreviewOptions = {}) {
     const {
@@ -55,20 +61,39 @@ class PrettyPreview {
     this.initEvent()
   }
 
-  get visible (): boolean {
-    return this.#visible
+  get idx (): number {
+    return this.#idx
   }
 
-  set visible (val: boolean) {
-    this.#visible = val
+  set idx (idx: number) {
+    const { previewSrcList } = this
+    const index = Math.min(previewSrcList.length - 1, Math.max(0, idx))
 
-    let { container } = this
-
-    if (!container) {
-      container = this.createContainer()
+    if (index === this.#idx) {
+      return
     }
 
-    container.style.opacity = val ? '1' : '0'
+    this.#idx = index
+
+    void Promise.resolve().then(() => {
+      const oSwitchLeftBtn = document.querySelector('.pretty-preview-btn-switch-left')
+      const oSwitchRightBtn = document.querySelector('.pretty-preview-btn-switch-right')
+
+      if (oSwitchLeftBtn) {
+        oSwitchLeftBtn.classList[index <= 0 ? 'add' : 'remove']('pretty-preview-btn-switch-disabled')
+      }
+
+      if (oSwitchRightBtn) {
+        oSwitchRightBtn.classList[index >= (previewSrcList.length - 1) ? 'add' : 'remove']('pretty-preview-btn-switch-disabled')
+      }
+
+      this.currentImage = document.querySelector('.pretty-perview-img') as HTMLImageElement
+
+      if (this.currentImage) {
+        this.setCurrentImageTransform('default')
+        this.currentImage.src = previewSrcList[idx]
+      }
+    })
   }
 
   get scalePercent (): number {
@@ -76,7 +101,17 @@ class PrettyPreview {
   }
 
   set scalePercent (val: number) {
-    this.#scalePercent = val
+    this.#scalePercent = Math.max(3, val)
+
+    console.log('set?', val)
+
+    const oScalePercent = document.querySelector('.pretty-preview-scale-percent')
+
+    if (oScalePercent) {
+      oScalePercent.innerHTML = `${val}%`
+    }
+
+    this.setCurrentImageTransform('scale', `${val / 100}`)
   }
 
   get showOriginalScale (): boolean {
@@ -85,17 +120,31 @@ class PrettyPreview {
 
   set showOriginalScale (bool: boolean) {
     this.#showOriginalScale = bool
+    this.scalePercent = bool ? this.defaultScalePercent : 100
 
     const oScaleBtns = document.querySelectorAll('.pretty-preview-btn-scale')
 
     oScaleBtns.forEach(btn => {
-      console.log(btn)
       if (btn.classList.contains('pretty-preview-btn-scale-to-large')) {
-        (btn as HTMLElement).style.cssText = bool ? 'display: none' : ''
+        void Promise.resolve().then(() => {
+          (btn as HTMLElement).style.cssText = bool ? 'display: none' : ''
+        })
       } else {
-        (btn as HTMLElement).style.cssText = bool ? '' : 'display: none'
+        void Promise.resolve().then(() => {
+          (btn as HTMLElement).style.cssText = bool ? '' : 'display: none'
+        })
       }
     })
+  }
+
+  get angle (): number {
+    return this.#angle
+  }
+
+  set angle (angle: number) {
+    this.#angle = angle
+
+    this.setCurrentImageTransform('rotate', `${angle}deg`)
   }
 
   initOptions (options: PrettyPreviewOptions): void {
@@ -113,27 +162,92 @@ class PrettyPreview {
     this.rootEl.addEventListener('click', this.handleClick.bind(this), false)
   }
 
+  setCurrentImageTransform (props: 'default' | 'scale' | 'rotate', value: string = ''): void {
+    const { currentImage } = this
+
+    if (currentImage) {
+      if (props === 'default') {
+        currentImage.style.transform = 'scale(1) rotate(0)'
+        return
+      }
+
+      const reg = new RegExp(`(${props}\\(.*?\\))`)
+      currentImage.style.transform = (currentImage.style.transform || 'scale(1) rotate(0)').replace(reg, `${props}(${value})`)
+    }
+  }
+
+  setBodyOverflow (hidden: boolean = false): void {
+    document.body.style.overflow = hidden ? 'hidden' : 'unset'
+  }
+
+  handleImgLoaded (e: Event): void {
+    const target = e.target as HTMLImageElement
+    if (target) {
+      const { naturalWidth, naturalHeight } = target
+      const [width, height] = this.viewportSize
+
+      // 计算比例
+      const widthRadio = width / naturalWidth
+      const heightRadio = height / naturalHeight
+      const radio = widthRadio < heightRadio ? widthRadio : heightRadio
+
+      if (radio < 1) {
+        this.defaultScalePercent = Number((radio * 100).toFixed(0))
+      } else {
+        this.defaultScalePercent = 100
+      }
+
+      this.imageSize = [naturalWidth, naturalHeight]
+
+      this.scalePercent = this.defaultScalePercent
+    }
+  }
+
   handleClick (e: MouseEvent): void {
     const target = e.target as HTMLElement
 
     if (target) {
-      console.log(target)
-
       const idx = this.imgs.indexOf(target)
       if (idx !== -1) {
         this.idx = idx
-        this.visible = true
+        this.setBodyOverflow(true)
+        this.createContainer()
       }
+    }
+  }
+
+  handleCloseBtnClick (): void {
+    if (this.container) {
+      this.setBodyOverflow(false)
+      document.body.removeChild(this.container)
+      this.container = null
+    }
+  }
+
+  handleSwitchBtnClick (type: 'left' | 'right'): void {
+    switch (type) {
+      case 'left':
+        this.idx -= 1
+        break
+      case 'right':
+        this.idx += 1
+        break
+      default:
+        break
     }
   }
 
   handleOperationsBtnClick (e: MouseEvent): void {
     const target = e.target as HTMLElement
 
+    if (target.classList.contains('pretty-preview-operations')) {
+      return
+    }
+
     let btn: HTMLElement | null = target
     while (btn && !btn.classList.contains('pretty-preview-btn')) {
       btn = btn.parentNode as HTMLElement
-      if (btn.classList.contains('pretty-preview-container')) {
+      if (btn.classList.contains('pretty-preview-operations')) {
         btn = null
       }
     }
@@ -143,8 +257,58 @@ class PrettyPreview {
         this.showOriginalScale = !this.showOriginalScale
         return
       }
-      console.log('no contains')
+
+      if (btn.classList.contains('pretty-preview-btn-turn-left')) {
+        this.angle -= 90
+        return
+      }
+
+      if (btn.classList.contains('pretty-preview-btn-turn-right')) {
+        this.angle += 90
+        return
+      }
+
+      if (btn.classList.contains('pretty-preview-btn-minus')) {
+        this.handleChangeScalePercent('minus')
+        return
+      }
+
+      if (btn.classList.contains('pretty-preview-btn-plus')) {
+        this.handleChangeScalePercent('plus')
+      }
     }
+  }
+
+  handleChangeScalePercent (action: 'minus' | 'plus'): void {
+    // 3 6 12 25 50 75 100
+    const { scalePercent } = this
+
+    if (scalePercent <= 3) {
+      this.scalePercent = action === 'minus' ? 3 : 6
+    } else if (scalePercent <= 6) {
+      this.scalePercent = action === 'minus' ? 3 : scalePercent === 6 ? 12 : 6
+    } else if (scalePercent <= 12) {
+      this.scalePercent = action === 'minus' ? 6 : scalePercent === 12 ? 25 : 12
+    } else if (scalePercent <= 25) {
+      this.scalePercent = action === 'minus' ? 12 : scalePercent === 25 ? 50 : 25
+    } else {
+      this.scalePercent = action === 'minus' ? (Math.ceil(scalePercent / 25) - 1) * 25 : (Math.floor(scalePercent / 25) + 1) * 25
+    }
+  }
+
+  handleMouseDown (e: MouseEvent): void {
+    console.log('down', e)
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  handleMouseWheel (e: WheelEvent): void {
+    e.preventDefault()
+    e.stopPropagation()
+
+    const { deltaY } = e
+    console.log('wheel', deltaY / -50)
+    this.scalePercent += deltaY > 0 ? -1 : 1
   }
 
   createContainer (): HTMLDivElement {
@@ -173,38 +337,46 @@ class PrettyPreview {
 
     this.createCanvas(oBody)
 
-    oBody.appendChild(createBtn('close', {
+    const oCloseBtn = createBtn('close', {
       class: 'pretty-preview-btn pretty-preview-btn-close'
-    }))
-    oBody.appendChild(createBtn('left', {
+    })
+
+    const oSwitchLeftBtn = createBtn('left', {
       class: 'pretty-preview-btn pretty-preview-btn-switch-left'
-    }))
-    oBody.appendChild(createBtn('right', {
+    })
+
+    const oSwitchRightBtn = createBtn('right', {
       class: 'pretty-preview-btn pretty-preview-btn-switch-right'
-    }))
+    })
+
+    oBody.appendChild(oCloseBtn)
+    oBody.appendChild(oSwitchLeftBtn)
+    oBody.appendChild(oSwitchRightBtn)
 
     this.createOperations(oBody)
 
     container.appendChild(oBody)
+
+    oCloseBtn.addEventListener('click', this.handleCloseBtnClick.bind(this), false)
+    oSwitchLeftBtn.addEventListener('click', this.handleSwitchBtnClick.bind(this, 'left'), false)
+    oSwitchRightBtn.addEventListener('click', this.handleSwitchBtnClick.bind(this, 'right'), false)
   }
 
   createCanvas (container: HTMLDivElement): void {
-    const { previewSrcList, lazy } = this
-
     const oCanvas = createElement('div', { class: 'pretty-preview-canvas' })
-
-    previewSrcList.forEach(src => {
-      const oWrapper = createElement('div', { class: 'pretty-preview-wrapper' })
-      const oImg = createElement('img', {
-        [lazy ? 'data-src' : 'src']: src,
-        class: 'pretty-perview-img'
-      })
-
-      oWrapper.append(oImg)
-      oCanvas.append(oWrapper)
+    const oWrapper = createElement('div', { class: 'pretty-preview-wrapper' })
+    const oImg = createElement('img', {
+      class: 'pretty-perview-img'
     })
 
+    oWrapper.append(oImg)
+    oCanvas.append(oWrapper)
+
     container.appendChild(oCanvas)
+
+    oImg.addEventListener('load', this.handleImgLoaded.bind(this), false)
+    oImg.addEventListener('mousedown', this.handleMouseDown.bind(this), false)
+    oCanvas.addEventListener('wheel', this.handleMouseWheel.bind(this), false)
   }
 
   createOperations (container: HTMLDivElement): void {
@@ -215,7 +387,7 @@ class PrettyPreview {
     })
 
     oOperations.appendChild(createBtn('turnLeft', { class: 'pretty-preview-btn pretty-preview-btn-turn-left' }))
-    oOperations.appendChild(createBtn('turnRight', { class: 'pretty-preview-btn pretty-preview-btn-turn-left' }))
+    oOperations.appendChild(createBtn('turnRight', { class: 'pretty-preview-btn pretty-preview-btn-turn-right' }))
     oOperations.appendChild(createBtn('minus', { class: 'pretty-preview-btn pretty-preview-btn-minus' }))
 
     oOperations.appendChild(createElement('div', { class: 'pretty-preview-scale-percent' }, '', `${this.scalePercent}%`))
