@@ -9,7 +9,7 @@ export interface PrettyPreviewOptions {
 }
 
 class PrettyPreview {
-  private readonly rootEl: HTMLElement = document.body
+  private readonly rootEl: HTMLElement
   private readonly previewSrcList: string[] = []
   private readonly imgs: HTMLElement[] = []
 
