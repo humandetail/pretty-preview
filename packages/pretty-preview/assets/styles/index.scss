@@ -1,0 +1,98 @@
+.pretty-preview-container {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 9999;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+
+  .pretty-preview-mask {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,.2);
+  }
+
+  .pretty-preview-body {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+
+    .pretty-preview-canvas {
+      position: abosulte;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .pretty-preview-operations {
+      display: inline-flex;
+      position: absolute;
+      left: 50%;
+      bottom: 16px;
+      height: 44px;
+      padding: 0 8px;
+      border-radius: 22px;
+      background-color: rgba(0,0,0,.2);
+      transform: translateX(-50%);
+
+      .pretty-preview-scale-percent {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 80px;
+        color: #fff;
+      }
+    }
+
+    .pretty-preview-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      fill: #fff;
+      cursor: pointer;
+
+      &.pretty-preview-btn-disabled {
+        fill: #ddd;
+        cursor: not-allowed;
+      }
+
+      &:hover {
+        fill: #0099ff;
+      }
+
+      &.pretty-preview-btn-close {
+        position: absolute;
+        right: 16px;
+        top: 16px;
+        border-radius: 50%;
+        background-color: rgba(0,0,0,.2);
+      }
+
+      &.pretty-preview-btn-switch-left,
+      &.pretty-preview-btn-switch-right {
+        position: absolute;
+        top: 50%;
+        border-radius: 50%;
+        background-color: rgba(0,0,0,.2);
+        transform: translateY(-50%);
+      }
+
+      &.pretty-preview-btn-switch-left {
+        left: 16px;
+      }
+
+      &.pretty-preview-btn-switch-right {
+        right: 16px;
+      }
+    }
+  }
+}

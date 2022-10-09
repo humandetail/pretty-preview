@@ -18,7 +18,6 @@ specifiers:
   eslint-plugin-promise: ^6.0.0
   husky: ^8.0.0
   lint-staged: ^13.0.3
-  prettier: ^2.7.1
   typescript: '*'
   vite: ^3.1.0
   vitest: ^0.24.0
@@ -37,11 +36,10 @@ devDependencies:
   eslint-config-standard-with-typescript: 23.0.0_d3fnrl5am7mk7twr547f3qmcte
   eslint-plugin-import: 2.26.0_taj4374tq64ju3xgkdrtdwfble
   eslint-plugin-n: 15.3.0_eslint@8.24.0
-  eslint-plugin-prettier: 4.2.1_cfn5x6ujhhgzv3423d6k7r2zzm
+  eslint-plugin-prettier: 4.2.1_awmkh7s2gfwufkvh6fnk6cae3q
   eslint-plugin-promise: 6.0.1_eslint@8.24.0
   husky: 8.0.1
   lint-staged: 13.0.3
-  prettier: 2.7.1
   typescript: 4.8.4
   vite: 3.1.6
   vitest: 0.24.0
@@ -1643,7 +1641,7 @@ packages:
       semver: 7.3.8
     dev: true
 
-  /eslint-plugin-prettier/4.2.1_cfn5x6ujhhgzv3423d6k7r2zzm:
+  /eslint-plugin-prettier/4.2.1_awmkh7s2gfwufkvh6fnk6cae3q:
     resolution: {integrity: sha512-f/0rXLXUt0oFYs8ra4w49wYZBG5GKZpAYsJSm6rnYL5uVDjd+zowwMwVZHnAjf4edNrKpCDYfXDgmRE/Ak7QyQ==}
     engines: {node: '>=12.0.0'}
     peerDependencies:
@@ -1656,7 +1654,6 @@ packages:
     dependencies:
       eslint: 8.24.0
       eslint-config-prettier: 8.5.0_eslint@8.24.0
-      prettier: 2.7.1
       prettier-linter-helpers: 1.0.0
     dev: true
 
@@ -3082,12 +3079,6 @@ packages:
     engines: {node: '>=6.0.0'}
     dependencies:
       fast-diff: 1.2.0
-    dev: true
-
-  /prettier/2.7.1:
-    resolution: {integrity: sha512-ujppO+MkdPqoVINuDFDRLClm7D78qbDt0/NR+wp5FqEZOoTNAjPHWj17QRhu7geIHJfcNhRk1XVQmF8Bp3ye+g==}
-    engines: {node: '>=10.13.0'}
-    hasBin: true
     dev: true
 
   /punycode/2.1.1:

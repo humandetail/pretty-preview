@@ -3,7 +3,7 @@ module.exports = {
     browser: true,
     es2021: true
   },
-  extends: ['standard-with-typescript', 'plugin:prettier/recommended'],
+  extends: ['standard-with-typescript'],
   overrides: [
     {
       files: '*.ts'
@@ -12,7 +12,9 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module',
-    project: ['./tsconfig.json']
+    project: ['./tsconfig.json', './example/tsconfig.json']
   },
-  rules: {}
+  rules: {
+    '@typescript-eslint/strict-boolean-expressions': 0
+  }
 }
