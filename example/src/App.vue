@@ -13,8 +13,7 @@ import '../../packages/pretty-preview/assets/styles/index.scss'
 
 onMounted(() => {
   const pp = new PrettyPreview({
-    root: '.wrapper',
-    lazy: false
+    root: '.wrapper'
   })
 })
 </script>

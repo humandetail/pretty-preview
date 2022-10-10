@@ -5,7 +5,6 @@ export interface PrettyPreviewOptions {
   selector?: string
   srcAttr?: string
   useMask?: boolean
-  lazy?: boolean
 }
 
 class PrettyPreview {
@@ -16,18 +15,20 @@ class PrettyPreview {
   private container: HTMLDivElement | null = null
 
   private useMask: boolean = true
-  private lazy: boolean = true
 
   readonly viewportSize: [number, number] = [window.innerWidth, window.innerHeight]
   imageSize: [number, number] = [0, 0]
+  startPosition: [number, number] = [0, 0]
 
   #idx: number = -1
   #scalePercent: number = 100
-  defaultScalePercent: number = 50
   #showOriginalScale: boolean = false
   #angle: number = 0
+  #wrapperPosition: [number, number] = [0, 0]
+  defaultScalePercent: number = 50
 
   currentImage?: HTMLImageElement
+  currentImageWrapper?: HTMLDivElement
 
   constructor (options: PrettyPreviewOptions = {}) {
     const {
@@ -67,7 +68,7 @@ class PrettyPreview {
 
   set idx (idx: number) {
     const { previewSrcList } = this
-    const index = Math.min(previewSrcList.length - 1, Math.max(0, idx))
+    const index = Math.min(previewSrcList.length - 1, Math.max(-1, idx))
 
     if (index === this.#idx) {
       return
@@ -87,12 +88,12 @@ class PrettyPreview {
         oSwitchRightBtn.classList[index >= (previewSrcList.length - 1) ? 'add' : 'remove']('pretty-preview-btn-switch-disabled')
       }
 
-      this.currentImage = document.querySelector('.pretty-perview-img') as HTMLImageElement
-
       if (this.currentImage) {
         this.setCurrentImageTransform('default')
         this.currentImage.src = previewSrcList[idx]
       }
+
+      this.wrapperPosition = [0, 0]
     })
   }
 
@@ -112,6 +113,7 @@ class PrettyPreview {
     }
 
     this.setCurrentImageTransform('scale', `${val / 100}`)
+    this.setWrapperPosition()
   }
 
   get showOriginalScale (): boolean {
@@ -121,6 +123,8 @@ class PrettyPreview {
   set showOriginalScale (bool: boolean) {
     this.#showOriginalScale = bool
     this.scalePercent = bool ? this.defaultScalePercent : 100
+
+    this.wrapperPosition = [0, 0]
 
     const oScaleBtns = document.querySelectorAll('.pretty-preview-btn-scale')
 
@@ -147,14 +151,40 @@ class PrettyPreview {
     this.setCurrentImageTransform('rotate', `${angle}deg`)
   }
 
+  get wrapperPosition (): [number, number] {
+    return this.#wrapperPosition
+  }
+
+  set wrapperPosition (position: [number, number]) {
+    this.#wrapperPosition = position
+
+    let { currentImageWrapper } = this
+
+    if (!currentImageWrapper) {
+      currentImageWrapper = document.querySelector('.pretty-preview-wrapper') as HTMLDivElement
+    }
+
+    if (currentImageWrapper) {
+      currentImageWrapper.style.transform = `translate(${position[0]}px, ${position[1]}px)`
+    }
+  }
+
+  get currentImageSize (): [number, number] {
+    const { scalePercent, imageSize: [width, height] } = this
+    const scale = scalePercent / 100
+
+    return [
+      width * scale,
+      height * scale
+    ]
+  }
+
   initOptions (options: PrettyPreviewOptions): void {
     const {
-      useMask = true,
-      lazy = true
+      useMask = true
     } = options
 
     this.useMask = useMask
-    this.lazy = lazy
   }
 
   initEvent (): void {
@@ -178,6 +208,32 @@ class PrettyPreview {
 
   setBodyOverflow (hidden: boolean = false): void {
     document.body.style.overflow = hidden ? 'hidden' : 'unset'
+  }
+
+  setWrapperPosition (): void {
+    const {
+      viewportSize: [innerWidth, innerHeight],
+      currentImageSize: [currentWidth, currentHeight],
+      wrapperPosition
+    } = this
+
+    let [x, y] = wrapperPosition
+
+    console.log(currentWidth, x, innerWidth, innerWidth - currentWidth + x)
+
+    if (currentWidth <= innerWidth) {
+      x = 0
+    } else {
+      x = Math.min((currentWidth - innerWidth) / 2, Math.max((innerWidth - currentWidth) / 2, x))
+    }
+
+    if (currentHeight <= innerHeight) {
+      y = 0
+    } else {
+      y = Math.min((currentHeight - innerHeight) / 2, Math.max((innerHeight - currentHeight) / 2, y))
+    }
+
+    this.wrapperPosition = [x, y]
   }
 
   handleImgLoaded (e: Event): void {
@@ -209,9 +265,9 @@ class PrettyPreview {
     if (target) {
       const idx = this.imgs.indexOf(target)
       if (idx !== -1) {
-        this.idx = idx
         this.setBodyOverflow(true)
         this.createContainer()
+        this.idx = idx
       }
     }
   }
@@ -221,6 +277,7 @@ class PrettyPreview {
       this.setBodyOverflow(false)
       document.body.removeChild(this.container)
       this.container = null
+      this.idx = -1
     }
   }
 
@@ -297,9 +354,44 @@ class PrettyPreview {
   }
 
   handleMouseDown (e: MouseEvent): void {
-    console.log('down', e)
     e.preventDefault()
     e.stopPropagation()
+
+    const { clientX, clientY } = e
+    this.startPosition = [clientX, clientY]
+
+    const onMousemove = (e: MouseEvent): void => {
+      this.handleMousemove(e)
+    }
+
+    const onMouseup = (e: MouseEvent): void => {
+      this.handleMouseup(e)
+      document.removeEventListener('mousemove', onMousemove, false)
+      document.removeEventListener('mouseup', onMouseup, false)
+    }
+
+    document.addEventListener('mousemove', onMousemove, false)
+    document.addEventListener('mouseup', onMouseup, false)
+  }
+
+  handleMousemove (e: MouseEvent): void {
+    e.preventDefault()
+
+    const { clientX, clientY } = e
+    const {
+      startPosition: [startClientX, startClientY],
+      wrapperPosition: [currentX, currentY]
+    } = this
+
+    this.startPosition = [clientX, clientY]
+
+    this.wrapperPosition = [currentX + (clientX - startClientX), currentY + (clientY - startClientY)]
+  }
+
+  handleMouseup (e: MouseEvent): void {
+    e.preventDefault()
+
+    this.setWrapperPosition()
   }
 
   handleMouseWheel (e: WheelEvent): void {
@@ -373,6 +465,9 @@ class PrettyPreview {
     oCanvas.append(oWrapper)
 
     container.appendChild(oCanvas)
+
+    this.currentImageWrapper = oWrapper
+    this.currentImage = oImg
 
     oImg.addEventListener('load', this.handleImgLoaded.bind(this), false)
     oImg.addEventListener('mousedown', this.handleMouseDown.bind(this), false)
