@@ -122,4 +122,14 @@
       }
     }
   }
+
+  .pretty-preview-nav-canvas {
+    position: absolute;
+    right: 60px;
+    bottom: 60px;
+    outline: 1px solid #f1f1f1;
+    visibility: hidden;
+    background-position: 0 0;
+    background-repeat: no-repeat;
+  }
 }

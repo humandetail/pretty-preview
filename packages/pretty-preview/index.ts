@@ -1,3 +1,4 @@
+import NavCanvas from './utils/NavCavnas'
 import { createBtn, createElement } from './utils/dom'
 
 export interface PrettyPreviewOptions {
@@ -29,6 +30,8 @@ class PrettyPreview {
 
   currentImage?: HTMLImageElement
   currentImageWrapper?: HTMLDivElement
+
+  navCanvas?: NavCanvas
 
   constructor (options: PrettyPreviewOptions = {}) {
     const {
@@ -94,6 +97,10 @@ class PrettyPreview {
       }
 
       this.wrapperPosition = [0, 0]
+
+      if (this.navCanvas) {
+        this.navCanvas.setImage(previewSrcList[idx], ...this.imageSize)
+      }
     })
   }
 
@@ -104,8 +111,6 @@ class PrettyPreview {
   set scalePercent (val: number) {
     this.#scalePercent = Math.max(3, val)
 
-    console.log('set?', val)
-
     const oScalePercent = document.querySelector('.pretty-preview-scale-percent')
 
     if (oScalePercent) {
@@ -114,6 +119,19 @@ class PrettyPreview {
 
     this.setCurrentImageTransform('scale', `${val / 100}`)
     this.setWrapperPosition()
+
+    if (this.navCanvas) {
+      const {
+        viewportSize: [vW, vH],
+        currentImageSize: [iW, iH]
+      } = this
+      const widthRadio = iW / vW
+      const heightRadio = iH / vH
+      const radio = widthRadio < heightRadio ? widthRadio : heightRadio
+
+      this.navCanvas.setScale(radio)
+      this.navCanvas.show(radio > 1)
+    }
   }
 
   get showOriginalScale (): boolean {
@@ -167,6 +185,10 @@ class PrettyPreview {
     if (currentImageWrapper) {
       currentImageWrapper.style.transform = `translate(${position[0]}px, ${position[1]}px)`
     }
+
+    if (this.navCanvas) {
+      this.navCanvas.setPosition(position, this.currentImageSize)
+    }
   }
 
   get currentImageSize (): [number, number] {
@@ -188,7 +210,6 @@ class PrettyPreview {
   }
 
   initEvent (): void {
-    console.log(this.imgs)
     this.rootEl.addEventListener('click', this.handleClick.bind(this), false)
   }
 
@@ -218,8 +239,6 @@ class PrettyPreview {
     } = this
 
     let [x, y] = wrapperPosition
-
-    console.log(currentWidth, x, innerWidth, innerWidth - currentWidth + x)
 
     if (currentWidth <= innerWidth) {
       x = 0
@@ -255,6 +274,14 @@ class PrettyPreview {
 
       this.imageSize = [naturalWidth, naturalHeight]
 
+      if (!this.navCanvas) {
+        this.createNavCanvas(naturalWidth, naturalHeight)
+      }
+
+      if (this.navCanvas) {
+        this.navCanvas.setImage(this.previewSrcList[this.idx], naturalWidth, naturalHeight)
+      }
+
       this.scalePercent = this.defaultScalePercent
     }
   }
@@ -277,6 +304,7 @@ class PrettyPreview {
       this.setBodyOverflow(false)
       document.body.removeChild(this.container)
       this.container = null
+      this.navCanvas = undefined
       this.idx = -1
     }
   }
@@ -399,7 +427,6 @@ class PrettyPreview {
     e.stopPropagation()
 
     const { deltaY } = e
-    console.log('wheel', deltaY / -50)
     this.scalePercent += deltaY > 0 ? -1 : 1
   }
 
@@ -494,6 +521,17 @@ class PrettyPreview {
     container.appendChild(oOperations)
 
     oOperations.addEventListener('click', this.handleOperationsBtnClick.bind(this), false)
+  }
+
+  createNavCanvas (width: number, height: number): void {
+    const { scalePercent } = this
+    this.navCanvas = new NavCanvas({
+      width,
+      height,
+      scale: scalePercent / 100
+    })
+
+    this.container?.appendChild(this.navCanvas.canvas)
   }
 }
 
