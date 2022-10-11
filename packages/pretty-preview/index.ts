@@ -1,12 +1,7 @@
+import { CLASS_NAME } from './config/constants'
 import NavCanvas from './utils/NavCavnas'
 import { createBtn, createElement } from './utils/dom'
-
-export interface PrettyPreviewOptions {
-  root?: HTMLElement | string
-  selector?: string
-  srcAttr?: string
-  useMask?: boolean
-}
+import { Position, PrettyPreviewOptions, Size, State } from './types'
 
 class PrettyPreview {
   private readonly rootEl: HTMLElement
@@ -17,15 +12,16 @@ class PrettyPreview {
 
   private useMask: boolean = true
 
-  readonly viewportSize: [number, number] = [window.innerWidth, window.innerHeight]
-  imageSize: [number, number] = [0, 0]
-  startPosition: [number, number] = [0, 0]
+  readonly viewportSize: Size = [window.innerWidth, window.innerHeight]
+  startPosition: Size = [0, 0]
 
   #idx: number = -1
-  #scalePercent: number = 100
+  /** original size */
+  #imageSize: Size = [0, 0]
   #showOriginalScale: boolean = false
   #angle: number = 0
-  #wrapperPosition: [number, number] = [0, 0]
+  #wrapperPosition: Size = [0, 0]
+  #scalePercent: number = 100
   defaultScalePercent: number = 50
 
   currentImage?: HTMLImageElement
@@ -80,15 +76,15 @@ class PrettyPreview {
     this.#idx = index
 
     void Promise.resolve().then(() => {
-      const oSwitchLeftBtn = document.querySelector('.pretty-preview-btn-switch-left')
-      const oSwitchRightBtn = document.querySelector('.pretty-preview-btn-switch-right')
+      const oSwitchLeftBtn = document.querySelector(`.${CLASS_NAME['btn-switch-left']}`)
+      const oSwitchRightBtn = document.querySelector(`.${CLASS_NAME['btn-switch-right']}`)
 
       if (oSwitchLeftBtn) {
-        oSwitchLeftBtn.classList[index <= 0 ? 'add' : 'remove']('pretty-preview-btn-switch-disabled')
+        oSwitchLeftBtn.classList[index <= 0 ? 'add' : 'remove'](`${CLASS_NAME['btn-switch-disabled']}`)
       }
 
       if (oSwitchRightBtn) {
-        oSwitchRightBtn.classList[index >= (previewSrcList.length - 1) ? 'add' : 'remove']('pretty-preview-btn-switch-disabled')
+        oSwitchRightBtn.classList[index >= (previewSrcList.length - 1) ? 'add' : 'remove'](`${CLASS_NAME['btn-switch-disabled']}`)
       }
 
       if (this.currentImage) {
@@ -99,7 +95,7 @@ class PrettyPreview {
       this.wrapperPosition = [0, 0]
 
       if (this.navCanvas) {
-        this.navCanvas.setImage(previewSrcList[idx], ...this.imageSize)
+        this.navCanvas.setState(this.currentState)
       }
     })
   }
@@ -111,7 +107,7 @@ class PrettyPreview {
   set scalePercent (val: number) {
     this.#scalePercent = Math.max(3, val)
 
-    const oScalePercent = document.querySelector('.pretty-preview-scale-percent')
+    const oScalePercent = document.querySelector(`.${CLASS_NAME['scale-percent']}`)
 
     if (oScalePercent) {
       oScalePercent.innerHTML = `${val}%`
@@ -121,16 +117,7 @@ class PrettyPreview {
     this.setWrapperPosition()
 
     if (this.navCanvas) {
-      const {
-        viewportSize: [vW, vH],
-        currentImageSize: [iW, iH]
-      } = this
-      const widthRadio = iW / vW
-      const heightRadio = iH / vH
-      const radio = widthRadio < heightRadio ? widthRadio : heightRadio
-
-      this.navCanvas.setScale(radio)
-      this.navCanvas.show(radio > 1)
+      this.navCanvas.setState(this.currentState)
     }
   }
 
@@ -144,10 +131,10 @@ class PrettyPreview {
 
     this.wrapperPosition = [0, 0]
 
-    const oScaleBtns = document.querySelectorAll('.pretty-preview-btn-scale')
+    const oScaleBtns = document.querySelectorAll(`.${CLASS_NAME['btn-scale']}`)
 
     oScaleBtns.forEach(btn => {
-      if (btn.classList.contains('pretty-preview-btn-scale-to-large')) {
+      if (btn.classList.contains(`${CLASS_NAME['btn-scale-to-large']}`)) {
         void Promise.resolve().then(() => {
           (btn as HTMLElement).style.cssText = bool ? 'display: none' : ''
         })
@@ -167,19 +154,32 @@ class PrettyPreview {
     this.#angle = angle
 
     this.setCurrentImageTransform('rotate', `${angle}deg`)
+
+    // exchange width and height
+    const [width, height] = this.imageSize
+    this.imageSize = [height, width]
+
+    // When the Angle is changed,
+    // the scale and position should be set to default values.
+    this.scalePercent = this.defaultScalePercent
+    this.wrapperPosition = [0, 0]
+
+    if (this.navCanvas) {
+      this.navCanvas.setState(this.currentState)
+    }
   }
 
-  get wrapperPosition (): [number, number] {
+  get wrapperPosition (): Size {
     return this.#wrapperPosition
   }
 
-  set wrapperPosition (position: [number, number]) {
+  set wrapperPosition (position: Position) {
     this.#wrapperPosition = position
 
     let { currentImageWrapper } = this
 
     if (!currentImageWrapper) {
-      currentImageWrapper = document.querySelector('.pretty-preview-wrapper') as HTMLDivElement
+      currentImageWrapper = document.querySelector(`.${CLASS_NAME.wrapper}`) as HTMLDivElement
     }
 
     if (currentImageWrapper) {
@@ -187,11 +187,19 @@ class PrettyPreview {
     }
 
     if (this.navCanvas) {
-      this.navCanvas.setPosition(position, this.currentImageSize)
+      this.navCanvas.setState(this.currentState)
     }
   }
 
-  get currentImageSize (): [number, number] {
+  get imageSize (): Size {
+    return this.#imageSize
+  }
+
+  set imageSize (size: Size) {
+    this.#imageSize = size
+  }
+
+  get currentImageSize (): Size {
     const { scalePercent, imageSize: [width, height] } = this
     const scale = scalePercent / 100
 
@@ -199,6 +207,29 @@ class PrettyPreview {
       width * scale,
       height * scale
     ]
+  }
+
+  get currentState (): State {
+    const {
+      wrapperPosition,
+      scalePercent,
+      angle,
+      idx,
+      previewSrcList,
+      imageSize,
+      currentImageSize,
+      viewportSize
+    } = this
+
+    return {
+      img: previewSrcList[idx],
+      position: wrapperPosition,
+      scale: scalePercent / 100,
+      angle,
+      originalSize: imageSize,
+      currentSize: currentImageSize,
+      viewportSize
+    }
   }
 
   initOptions (options: PrettyPreviewOptions): void {
@@ -275,11 +306,14 @@ class PrettyPreview {
       this.imageSize = [naturalWidth, naturalHeight]
 
       if (!this.navCanvas) {
-        this.createNavCanvas(naturalWidth, naturalHeight)
+        if (this.container) {
+          this.createNavCanvas(this.container)
+        }
       }
 
       if (this.navCanvas) {
-        this.navCanvas.setImage(this.previewSrcList[this.idx], naturalWidth, naturalHeight)
+        this.navCanvas.setState(this.currentState)
+        // this.navCanvas.setImage(this.previewSrcList[this.idx], naturalWidth, naturalHeight)
       }
 
       this.scalePercent = this.defaultScalePercent
@@ -325,40 +359,40 @@ class PrettyPreview {
   handleOperationsBtnClick (e: MouseEvent): void {
     const target = e.target as HTMLElement
 
-    if (target.classList.contains('pretty-preview-operations')) {
+    if (target.classList.contains(`${CLASS_NAME.operations}`)) {
       return
     }
 
     let btn: HTMLElement | null = target
-    while (btn && !btn.classList.contains('pretty-preview-btn')) {
+    while (btn && !btn.classList.contains(`${CLASS_NAME.btn}`)) {
       btn = btn.parentNode as HTMLElement
-      if (btn.classList.contains('pretty-preview-operations')) {
+      if (btn.classList.contains(`${CLASS_NAME.operations}`)) {
         btn = null
       }
     }
 
     if (btn) {
-      if (btn.classList.contains('pretty-preview-btn-scale')) {
+      if (btn.classList.contains(`${CLASS_NAME['btn-scale']}`)) {
         this.showOriginalScale = !this.showOriginalScale
         return
       }
 
-      if (btn.classList.contains('pretty-preview-btn-turn-left')) {
+      if (btn.classList.contains(`${CLASS_NAME['btn-turn-left']}`)) {
         this.angle -= 90
         return
       }
 
-      if (btn.classList.contains('pretty-preview-btn-turn-right')) {
+      if (btn.classList.contains(`${CLASS_NAME['btn-turn-right']}`)) {
         this.angle += 90
         return
       }
 
-      if (btn.classList.contains('pretty-preview-btn-minus')) {
+      if (btn.classList.contains(`${CLASS_NAME['btn-minus']}`)) {
         this.handleChangeScalePercent('minus')
         return
       }
 
-      if (btn.classList.contains('pretty-preview-btn-plus')) {
+      if (btn.classList.contains(`${CLASS_NAME['btn-plus']}`)) {
         this.handleChangeScalePercent('plus')
       }
     }
@@ -431,7 +465,7 @@ class PrettyPreview {
   }
 
   createContainer (): HTMLDivElement {
-    const container = createElement('div', { class: 'pretty-preview-container' })
+    const container = createElement('div', { class: `${CLASS_NAME.container}` })
 
     this.createMask(container)
     this.createPreviewBody(container)
@@ -445,27 +479,27 @@ class PrettyPreview {
 
   createMask (container: HTMLDivElement): void {
     if (this.useMask) {
-      const oMask = createElement('div', { class: 'pretty-preview-mask' })
+      const oMask = createElement('div', { class: `${CLASS_NAME.mask}` })
 
       container.appendChild(oMask)
     }
   }
 
   createPreviewBody (container: HTMLDivElement): void {
-    const oBody = createElement('div', { class: 'pretty-preview-body' })
+    const oBody = createElement('div', { class: `${CLASS_NAME.body}` })
 
     this.createCanvas(oBody)
 
     const oCloseBtn = createBtn('close', {
-      class: 'pretty-preview-btn pretty-preview-btn-close'
+      class: `${CLASS_NAME.btn} ${CLASS_NAME['btn-close']}`
     })
 
     const oSwitchLeftBtn = createBtn('left', {
-      class: 'pretty-preview-btn pretty-preview-btn-switch-left'
+      class: `${CLASS_NAME.btn} ${CLASS_NAME['btn-switch-left']}`
     })
 
     const oSwitchRightBtn = createBtn('right', {
-      class: 'pretty-preview-btn pretty-preview-btn-switch-right'
+      class: `${CLASS_NAME.btn} ${CLASS_NAME['btn-switch-right']}`
     })
 
     oBody.appendChild(oCloseBtn)
@@ -482,8 +516,8 @@ class PrettyPreview {
   }
 
   createCanvas (container: HTMLDivElement): void {
-    const oCanvas = createElement('div', { class: 'pretty-preview-canvas' })
-    const oWrapper = createElement('div', { class: 'pretty-preview-wrapper' })
+    const oCanvas = createElement('div', { class: `${CLASS_NAME.canvas}` })
+    const oWrapper = createElement('div', { class: `${CLASS_NAME.wrapper}` })
     const oImg = createElement('img', {
       class: 'pretty-perview-img'
     })
@@ -505,33 +539,28 @@ class PrettyPreview {
     const { showOriginalScale } = this
 
     const oOperations = createElement('div', {
-      class: 'pretty-preview-operations'
+      class: `${CLASS_NAME.operations}`
     })
 
-    oOperations.appendChild(createBtn('turnLeft', { class: 'pretty-preview-btn pretty-preview-btn-turn-left' }))
-    oOperations.appendChild(createBtn('turnRight', { class: 'pretty-preview-btn pretty-preview-btn-turn-right' }))
-    oOperations.appendChild(createBtn('minus', { class: 'pretty-preview-btn pretty-preview-btn-minus' }))
+    oOperations.appendChild(createBtn('turnLeft', { class: `${CLASS_NAME.btn} ${CLASS_NAME['btn-turn-left']}` }))
+    oOperations.appendChild(createBtn('turnRight', { class: `${CLASS_NAME.btn} ${CLASS_NAME['btn-turn-right']}` }))
+    oOperations.appendChild(createBtn('minus', { class: `${CLASS_NAME.btn} ${CLASS_NAME['btn-minus']}` }))
 
-    oOperations.appendChild(createElement('div', { class: 'pretty-preview-scale-percent' }, '', `${this.scalePercent}%`))
+    oOperations.appendChild(createElement('div', { class: `${CLASS_NAME['scale-percent']}` }, '', `${this.scalePercent}%`))
 
-    oOperations.appendChild(createBtn('plus', { class: 'pretty-preview-btn pretty-preview-btn-plus' }))
-    oOperations.appendChild(createBtn('scaleToLarge', { class: 'pretty-preview-btn pretty-preview-btn-scale pretty-preview-btn-scale-to-large' }, showOriginalScale ? 'display: none' : ''))
-    oOperations.appendChild(createBtn('scaleToOriginal', { class: 'pretty-preview-btn pretty-preview-btn-scale pretty-preview-btn-scale-to-original' }, showOriginalScale ? '' : 'display: none'))
+    oOperations.appendChild(createBtn('plus', { class: `${CLASS_NAME.btn} ${CLASS_NAME['btn-plus']}` }))
+    oOperations.appendChild(createBtn('scaleToLarge', { class: `${CLASS_NAME.btn} ${CLASS_NAME['btn-scale']} ${CLASS_NAME['btn-scale-to-large']}` }, showOriginalScale ? 'display: none' : ''))
+    oOperations.appendChild(createBtn('scaleToOriginal', { class: `${CLASS_NAME.btn} ${CLASS_NAME['btn-scale']} ${CLASS_NAME['btn-scale-to-original']}` }, showOriginalScale ? '' : 'display: none'))
 
     container.appendChild(oOperations)
 
     oOperations.addEventListener('click', this.handleOperationsBtnClick.bind(this), false)
   }
 
-  createNavCanvas (width: number, height: number): void {
-    const { scalePercent } = this
-    this.navCanvas = new NavCanvas({
-      width,
-      height,
-      scale: scalePercent / 100
-    })
+  createNavCanvas (container: HTMLDivElement): void {
+    this.navCanvas = new NavCanvas()
 
-    this.container?.appendChild(this.navCanvas.canvas)
+    container.appendChild(this.navCanvas.el)
   }
 }
 

@@ -1,43 +1,70 @@
 import { createElement } from './dom'
-
-export interface NavCanvasOptions {
-  width: number
-  height: number
-  scale: number
-}
+import { Position, Size, State } from '../types'
+import { CLASS_NAME } from '../config/constants'
 
 export default class NavCanvas {
-  readonly canvas: HTMLCanvasElement
+  private readonly canvas: HTMLCanvasElement
   private readonly ctx: CanvasRenderingContext2D
-  private width: number
-  private height: number
-
+  private width: number = 0
+  private height: number = 0
   private readonly maxSize: number = 200
 
-  scale: number = 0
-  areaSize: [number, number] = [0, 0]
-  position: [number, number] = [0, 0]
+  private readonly bg: HTMLDivElement
+  el: HTMLDivElement
 
-  constructor ({
-    width,
-    height,
-    scale
-  }: NavCanvasOptions) {
-    const oCanvas = createElement('canvas', {
-      class: 'pretty-preview-nav-canvas'
+  scale: number = 0
+  areaSize: Size = [0, 0]
+  frameSize: Size = [0, 0]
+  framePosition: Position = [0, 0]
+
+  viewportSize: Size = [0, 0]
+
+  areaPosition: Position = [0, 0]
+  startPosition: Position = [0, 0]
+
+  state: State = {
+    img: '',
+    position: [0, 0],
+    scale: 0,
+    angle: 0,
+    originalSize: [0, 0],
+    currentSize: [0, 0],
+    viewportSize: [0, 0]
+  }
+
+  constructor () {
+    const oWrapper = createElement('div', {
+      class: CLASS_NAME['nav-canvas-wrapper']
     })
+
+    const oBg = createElement('div', {
+      class: CLASS_NAME['nav-canvas-bg']
+    })
+
+    const oCanvas = createElement('canvas', {
+      class: CLASS_NAME['nav-canvas']
+    })
+
+    oWrapper.appendChild(oBg)
+    oWrapper.appendChild(oCanvas)
 
     this.canvas = oCanvas
     this.ctx = oCanvas.getContext('2d') as CanvasRenderingContext2D
-    this.width = width
-    this.height = height
-    this.scale = scale
 
-    this.init()
+    this.el = oWrapper
+    this.bg = oBg
+
+    this.initEvent()
   }
 
-  init (): void {
-    const { canvas, width, height, maxSize } = this
+  initEvent (): void {
+    const { el } = this
+
+    el.addEventListener('mousedown', this.handleMousedown.bind(this), false)
+  }
+
+  initSize (angle: number): Size {
+    const { el, bg, canvas, width, height, maxSize } = this
     let scale = 1
     let w = width
     let h = height
@@ -61,54 +88,65 @@ export default class NavCanvas {
     canvas.width = w
     canvas.height = h
 
-    canvas.style.width = `${w}px`
-    canvas.style.height = `${h}px`
-    canvas.style.backgroundSize = `${w}px ${h}px`
-  }
+    el.style.width = `${w}px`
+    el.style.height = `${h}px`
 
-  setImage (src: string, width: number, height: number): void {
-    const oImg = new Image()
-
-    const { canvas } = this
-
-    oImg.onload = () => {
-      canvas.style.backgroundImage = `url(${src})`
-      this.width = width
-      this.height = height
-      this.init()
-      this.draw()
+    // fixed width and height.
+    if (angle % 180 !== 0) {
+      bg.style.backgroundSize = `${h}px ${w}px`
+      bg.style.width = `${h}px`
+      bg.style.height = `${w}px`
+    } else {
+      bg.style.backgroundSize = `${w}px ${h}px`
+      bg.style.width = `${w}px`
+      bg.style.height = `${h}px`
     }
 
-    oImg.src = src
+    return [w, h]
+  }
+
+  setState (state: State): void {
+    this.state = state
+    const {
+      img,
+      angle,
+      originalSize,
+      scale,
+      viewportSize: [vw, vh],
+      currentSize: [cw, ch],
+      position: [left, top]
+    } = state
+
+    this.width = originalSize[0]
+    this.height = originalSize[1]
+    this.scale = Math.max(1 / scale)
+    this.viewportSize = [vw, vh]
+
+    const [width, height] = this.initSize(angle)
+
+    // negative direction
+    this.framePosition = [
+      -1 * left * width / cw,
+      -1 * top * height / ch
+    ]
+
+    this.frameSize = [
+      width * vw / cw,
+      height * vh / ch
+    ]
+
+    this.setImage(img, angle)
+    this.show(cw > vw || ch > vh)
+    this.draw()
+  }
+
+  setImage (src: string, angle: number): void {
+    this.bg.style.backgroundImage = `url(${src})`
+    this.bg.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`
   }
 
   show (visible: boolean): void {
-    this.canvas.style.visibility = visible ? 'visible' : 'hidden'
-  }
-
-  setScale (scale: number): void {
-    this.scale = Math.min(1, 1 / scale)
-    if (this.scale < 1) {
-      this.show(true)
-      this.draw()
-    } else {
-      this.show(false)
-    }
-  }
-
-  setPosition ([left, top]: [number, number], [largeWidth, largeHeight]: [number, number]): void {
-    const { areaSize: [width, height] } = this
-
-    this.position = [
-      left * (width / largeWidth),
-      top * (height / largeHeight)
-    ]
-    if (this.scale < 1) {
-      this.show(true)
-      this.draw()
-    } else {
-      this.show(false)
-    }
+    this.el.style.visibility = visible ? 'visible' : 'hidden'
   }
 
   draw (): void {
@@ -126,44 +164,82 @@ export default class NavCanvas {
   drawRealFrame (): void {
     const {
       ctx,
-      areaSize: [width, height],
-      scale,
-      position: [left, top]
+      frameSize: [frameWidth, frameHeight],
+      areaSize: [areaWidth, areaHeight],
+      framePosition: [left, top]
     } = this
 
-    const w = width * scale
-    const h = height * scale
-    let x = -left + width / 2
-    let y = -top + height / 2
-
-    // Make sure the frame is not outside the area.
-    while (x - (w / 2) <= 0) {
-      x += 1
-    }
-    while (x + (w / 2) >= width) {
-      x -= 1
-    }
-
-    while (y - (h / 2) <= 0) {
-      y += 1
-    }
-    while (y + (h / 2) >= height) {
-      y -= 1
-    }
-
     ctx.save()
-    ctx.translate(x, y)
+    ctx.translate(areaWidth / 2 + left, areaHeight / 2 + top)
     ctx.strokeStyle = '#0098ff'
     ctx.lineWidth = 1
     ctx.globalCompositeOperation = 'destination-out'
-    ctx.fillRect(-w / 2, -h / 2, w, h)
+    ctx.fillRect(-frameWidth / 2, -frameHeight / 2, frameWidth, frameHeight)
     ctx.globalCompositeOperation = 'source-over'
-    ctx.strokeRect(-w / 2, -h / 2, w, h)
+    ctx.strokeRect(-frameWidth / 2, -frameHeight / 2, frameWidth, frameHeight)
     ctx.restore()
   }
 
   clearRect (): void {
-    const { width, height, ctx } = this
+    const { areaSize: [width, height], ctx } = this
     ctx.clearRect(0, 0, width, height)
+  }
+
+  handleMousedown (e: MouseEvent): void {
+    e.preventDefault()
+
+    const { clientX, clientY } = e
+
+    this.startPosition = [clientX, clientY]
+
+    const onMousemove = (e: MouseEvent): void => {
+      this.handleMousemove(e)
+    }
+
+    const onMouseup = (e: MouseEvent): void => {
+      this.handleMouseup(e)
+
+      document.removeEventListener('mousemove', onMousemove, false)
+      document.removeEventListener('mouseup', onMouseup, false)
+    }
+
+    document.addEventListener('mousemove', onMousemove, false)
+    document.addEventListener('mouseup', onMouseup, false)
+  }
+
+  handleMousemove (e: MouseEvent): void {
+    e.preventDefault()
+
+    this.setAreaMove(e)
+    // this.startPosition = [clientX, clientY]
+  }
+
+  handleMouseup (e: MouseEvent): void {
+    e.preventDefault()
+
+    this.setAreaMove(e, true)
+  }
+
+  setAreaMove (e: MouseEvent, isUp: boolean = false): void {
+    const {
+      startPosition: [sx, sy],
+      areaPosition: [ax, ay],
+      viewportSize: [vw, vh],
+      areaSize: [aw, ah]
+    } = this
+    const { clientX, clientY } = e
+
+    let [left, top] = [ax + clientX - sx, ay + clientY - sy]
+
+    // position right === 60
+    left = Math.min(60, Math.max(60 - (vw - aw), left))
+    // position top === 60
+    top = Math.min(60, Math.max(60 - (vh - ah), top))
+
+    this.el.style.transform = `translate(${left}px, ${top}px)`
+
+    if (isUp) {
+      this.areaPosition = [left, top]
+    }
   }
 }
