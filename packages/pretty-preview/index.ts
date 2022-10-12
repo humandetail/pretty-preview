@@ -519,7 +519,7 @@ class PrettyPreview {
     const oCanvas = createElement('div', { class: `${CLASS_NAME.canvas}` })
     const oWrapper = createElement('div', { class: `${CLASS_NAME.wrapper}` })
     const oImg = createElement('img', {
-      class: 'pretty-perview-img'
+      class: `${CLASS_NAME.img}`
     })
 
     oWrapper.append(oImg)
