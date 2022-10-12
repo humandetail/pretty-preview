@@ -1,5 +1,5 @@
 import { CLASS_NAME } from './config/constants'
-import NavCanvas from './utils/NavCavnas'
+import NavCanvas from './utils/NavCanvas'
 import { createBtn, createElement } from './utils/dom'
 import { Position, PrettyPreviewOptions, Size, State } from './types'
 
