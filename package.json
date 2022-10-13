@@ -1,7 +1,7 @@
 {
   "name": "pretty-preview",
   "private": false,
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "humandetail",
   "keywords": [
     "pretty",
@@ -15,6 +15,7 @@
   "main": "dist/pretty-preview.js",
   "module": "dist/pretty-preview.js",
   "files": ["dist/*"],
+  "types": "packages/pretty-preview/index.ts",
   "homepage": "https://github.com/humandetail/pretty-preview",
   "repository": {
     "type": "git",
