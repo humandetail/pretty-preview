@@ -18,6 +18,10 @@
   </a>
 </p>
 
+## Demo
+
+[demo](https://humandetail.github.io/pretty-preview/)
+
 ## Install
 
 Install with npm:
