@@ -41,8 +41,8 @@ pnpm add pretty-preview
 ## Usage
 
 ```js
-import { PrettyPreview } from 'pretty-preview'
-import 'pretty-preview/dist/pretty-preview.css'
+import PrettyPreview from 'pretty-preview'
+import 'pretty-preview/index.css'
 
 const pp = new PrettyPreview({
   root: '.wrapper'
