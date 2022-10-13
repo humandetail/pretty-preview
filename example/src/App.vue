@@ -8,8 +8,8 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue';
-import { PrettyPreview } from '../../packages/index'
-import '../../packages/pretty-preview/assets/styles/index.scss'
+import PrettyPreview from 'pretty-preview'
+import 'pretty-preview/index.css'
 
 onMounted(() => {
   const pp = new PrettyPreview({
@@ -19,4 +19,14 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.wrapper {
+  display: flex;
+}
+
+img {
+  width: 200px;
+  margin: 20px;
+  box-shadow: 0 0 4px #888;
+  cursor: zoom-in;
+}
 </style>

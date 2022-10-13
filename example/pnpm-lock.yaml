@@ -2,6 +2,7 @@ lockfileVersion: 5.4
 
 specifiers:
   '@vitejs/plugin-vue': ^3.1.0
+  pretty-preview: 0.0.7
   sass: ^1.55.0
   typescript: ^4.6.4
   vite: ^3.1.0
@@ -9,6 +10,7 @@ specifiers:
   vue-tsc: ^0.40.4
 
 dependencies:
+  pretty-preview: 0.0.7
   vue: 3.2.40
 
 devDependencies:
@@ -552,6 +554,10 @@ packages:
       nanoid: 3.3.4
       picocolors: 1.0.0
       source-map-js: 1.0.2
+
+  /pretty-preview/0.0.7:
+    resolution: {integrity: sha512-WnN6V9Uike93N52Y9i2pVXFOdwlk0dkU9epk7GbXCCabapYNs3wNAUXB0i20kDeXEgIhPKDfXtqsU+qLu24myQ==}
+    dev: false
 
   /readdirp/3.6.0:
     resolution: {integrity: sha512-hOS089on8RduqdbhvQ5Z37A0ESjsqz6qnRcffsMU3495FuTdqSm+7bhJ29JvIOsBDEEnan5DPu9t3To9VRlMzA==}
