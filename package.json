@@ -1,8 +1,29 @@
 {
   "name": "pretty-preview",
   "private": false,
-  "version": "0.0.0",
+  "version": "0.0.1",
+  "author": "humandetail",
+  "keywords": [
+    "pretty",
+    "preview",
+    "image",
+    "ui",
+    "typescript"
+  ],
+  "description": "A pretty image preview for browser",
   "type": "module",
+  "main": "dist/pretty-preview.js",
+  "module": "dist/pretty-preview.js",
+  "files": ["dist/*"],
+  "homepage": "https://github.com/humandetail/pretty-preview",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/humandetail/pretty-preview"
+  },
+  "bugs": {
+    "url": "https://github.com/humandetail/pretty-preview"
+  },
+  "license": "MIT",
   "scripts": {
     "dev": "vite",
     "test": "vitest run",
