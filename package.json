@@ -1,7 +1,7 @@
 {
   "name": "pretty-preview",
   "private": false,
-  "version": "0.0.2",
+  "version": "0.0.7",
   "author": "humandetail",
   "keywords": [
     "pretty",
@@ -13,9 +13,18 @@
   "description": "A pretty image preview for browser",
   "type": "module",
   "main": "dist/pretty-preview.js",
+  "browser": "dist/pretty-preview.js",
   "module": "dist/pretty-preview.js",
-  "files": ["dist/*"],
-  "types": "packages/pretty-preview/index.ts",
+  "files": ["dist/*", "packages/*"],
+  "types": "packages/index.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/pretty-preview.js"
+    },
+    "./index.css": "./dist/pretty-preview.css"
+  },
+  "unpkg": "dist/pretty-preview.js",
+  "jsdelivr": "dist/pretty-preview.js",
   "homepage": "https://github.com/humandetail/pretty-preview",
   "repository": {
     "type": "git",
