@@ -34,9 +34,10 @@ jobs:
         run: cd ./example && npm install && npm run build
       - name: Setup Pages
         uses: actions/configure-pages@v2
+      - name: Ls
+        run: ls ./example/dist
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
-        run: pwd
         with:
           # Upload entire repository
           path: './example/dist'
