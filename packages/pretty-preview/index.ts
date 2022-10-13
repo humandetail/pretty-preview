@@ -90,6 +90,7 @@ class PrettyPreview {
       if (this.currentImage) {
         this.setCurrentImageTransform('default')
         this.currentImage.src = previewSrcList[idx]
+        this.currentImage.style.transition = 'transform .4s'
       }
 
       this.wrapperPosition = [0, 0]
