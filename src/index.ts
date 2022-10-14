@@ -467,7 +467,7 @@ class PrettyPreview {
     e.stopPropagation()
 
     const { deltaY } = e
-    this.scalePercent += deltaY > 0 ? -1 : 1
+    this.scalePercent = Number((this.scalePercent * (deltaY > 0 ? 0.9 : 1.1)).toFixed(0))
   }
 
   createContainer (): HTMLDivElement {
