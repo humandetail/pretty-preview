@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { CLASS_NAME } from '../packages/pretty-preview/config/constants'
-import { State } from '../packages/pretty-preview/types'
-import NavCanvas from '../packages/pretty-preview/utils/NavCanvas'
+import { CLASS_NAME } from '../src/config/constants'
+import { State } from '../src/types'
+import NavCanvas from '../src/utils/NavCanvas'
 import { mockCanvas } from './helper'
 
 describe('NavCanvas', () => {

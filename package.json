@@ -15,8 +15,8 @@
   "main": "dist/pretty-preview.js",
   "browser": "dist/pretty-preview.js",
   "module": "dist/pretty-preview.js",
-  "files": ["dist/*", "packages/*"],
-  "types": "packages/index.ts",
+  "files": ["dist/*"],
+  "types": "src/index.ts",
   "exports": {
     ".": {
       "import": "./dist/pretty-preview.js"
@@ -35,11 +35,12 @@
   },
   "license": "MIT",
   "scripts": {
-    "dev": "vite",
+    "predev": "vite build --watch",
+    "dev": "cd example && npm run dev",
     "test": "vitest run",
     "coverage": "vitest run --coverage",
     "build": "tsc && vite build && pnpm run build:style",
-    "build:style": "sass packages/pretty-preview/assets/styles/index.scss:dist/pretty-preview.css --style=expanded --no-source-map",
+    "build:style": "sass src/assets/styles/index.scss:dist/pretty-preview.css --style=expanded --no-source-map",
     "preview": "vite preview",
     "prepare": "husky install",
     "codecov": "codecov"
@@ -70,7 +71,7 @@
     "vitest": "^0.24.0"
   },
   "lint-staged": {
-    "packages/**/*.ts": "eslint --fix"
+    "src/**/*.ts": "eslint --fix"
   },
   "config": {
     "commitizen": {

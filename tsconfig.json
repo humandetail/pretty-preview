@@ -17,7 +17,7 @@
     "skipLibCheck": true
   },
   "include": [
-    "packages/**/*",
+    "src/**/*",
     "test/**/*",
     "vite.config.ts"
   ],

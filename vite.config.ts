@@ -6,7 +6,7 @@ export default defineConfig({
   },
   build: {
     lib: {
-      entry: './packages/index.ts',
+      entry: './src/index.ts',
       name: 'PrettyPreview',
       fileName: 'pretty-preview',
       formats: ['es', 'iife']

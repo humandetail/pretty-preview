@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { createTemplate, mockCanvas } from './helper'
-import PrettyPreview from '../packages'
-import { CLASS_NAME, PREFIX } from '../packages/pretty-preview/config/constants'
+import PrettyPreview from '../src'
+import { CLASS_NAME, PREFIX } from '../src/config/constants'
 
 describe('PrettyPreview', () => {
   mockCanvas()
