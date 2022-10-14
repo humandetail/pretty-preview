@@ -119,10 +119,13 @@ describe('PrettyPreview', () => {
       stopPropagation: () => {}
     } as WheelEvent
 
+    let scalePercent = pp.scalePercent
     pp.handleMouseWheel(e)
-    expect(pp.scalePercent).toEqual(99)
+    scalePercent = Number((scalePercent * (e.deltaY > 0 ? 0.9 : 1.1)).toFixed(0))
+    expect(pp.scalePercent).toEqual(scalePercent)
     pp.handleMouseWheel(e)
-    expect(pp.scalePercent).toEqual(98)
+    scalePercent = Number((scalePercent * (e.deltaY > 0 ? 0.9 : 1.1)).toFixed(0))
+    expect(pp.scalePercent).toEqual(scalePercent)
 
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     e = {
@@ -132,9 +135,11 @@ describe('PrettyPreview', () => {
     } as WheelEvent
 
     pp.handleMouseWheel(e)
-    expect(pp.scalePercent).toEqual(99)
+    scalePercent = Number((scalePercent * (e.deltaY > 0 ? 0.9 : 1.1)).toFixed(0))
+    expect(pp.scalePercent).toEqual(scalePercent)
     pp.handleMouseWheel(e)
-    expect(pp.scalePercent).toEqual(100)
+    scalePercent = Number((scalePercent * (e.deltaY > 0 ? 0.9 : 1.1)).toFixed(0))
+    expect(pp.scalePercent).toEqual(scalePercent)
   })
 
   it('Should work correctly when drag.', () => {
