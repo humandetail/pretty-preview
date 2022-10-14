@@ -4,6 +4,12 @@
   <a href="https://codecov.io/gh/humandetail/pretty-preview" > 
     <img src="https://codecov.io/gh/humandetail/pretty-preview/branch/main/graph/badge.svg?token=5X0OFEAMK3"/> 
   </a>
+  <a href="https://www.npmjs.com/package/pretty-preview">
+    <img src="https://img.shields.io/npm/v/pretty-preview.svg" />
+  </a>
+  <a href="https://github.com/humandetail/pretty-preview/actions/workflows/page.ci.yml">
+    <img src="https://github.com/humandetail/pretty-preview/actions/workflows/page.ci.yml/badge.svg?branch=main" />
+  </a>
   <a href="https://github.com/humandetail/pretty-preview">
     <img src="https://img.shields.io/github/license/humandetail/pretty-preview.svg" />
   </a>
