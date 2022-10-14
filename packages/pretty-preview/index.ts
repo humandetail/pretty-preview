@@ -344,16 +344,22 @@ class PrettyPreview {
   }
 
   handleSwitchBtnClick (type: 'left' | 'right'): void {
+    let { idx } = this
+    const { previewSrcList } = this
     switch (type) {
       case 'left':
-        this.idx -= 1
+        idx -= 1
         break
       case 'right':
-        this.idx += 1
+        idx += 1
         break
       default:
         break
     }
+
+    idx = Math.min(previewSrcList.length - 1, Math.max(0, idx))
+
+    this.idx = idx
   }
 
   handleOperationsBtnClick (e: MouseEvent): void {
