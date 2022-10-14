@@ -31,7 +31,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Build example
-        run: cd ./example && npm install && npm run build
+        run: cd ./example && npm install -D && npm install -S && npm run build
       - name: Setup Pages
         uses: actions/configure-pages@v2
       - name: Ls
