@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "pretty-preview": "workspace:*",
+    "pretty-preview": "file:..",
     "vue": "^3.2.37"
   },
   "devDependencies": {

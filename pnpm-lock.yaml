@@ -55,14 +55,14 @@ importers:
   example:
     specifiers:
       '@vitejs/plugin-vue': ^3.1.0
-      pretty-preview: workspace:*
+      pretty-preview: file:..
       sass: ^1.55.0
       typescript: ^4.6.4
       vite: ^3.1.0
       vue: ^3.2.37
       vue-tsc: ^0.40.4
     dependencies:
-      pretty-preview: link:..
+      pretty-preview: 'file:'
       vue: 3.2.40
     devDependencies:
       '@vitejs/plugin-vue': 3.1.2_vite@3.1.6+vue@3.2.40
@@ -4613,3 +4613,9 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
     dev: true
+
+  'file:':
+    resolution: {directory: '', type: directory}
+    name: pretty-preview
+    version: 1.0.2
+    dev: false
