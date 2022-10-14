@@ -30,8 +30,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Checkout pnpm
+        uses: pnpm/action-setup@v2.0.1
+          with:
+            version: 7.13.4
       - name: Build example
-        run: cd ./example && npm install -D && pnpm install && pnpm run build
+        run: cd ./example && pnpm install && pnpm run build
       - name: Setup Pages
         uses: actions/configure-pages@v2
       - name: Ls
