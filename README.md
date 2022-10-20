@@ -1,8 +1,8 @@
 # PrettyPreview
 
 <p>
-  <a href="https://codecov.io/gh/humandetail/pretty-preview" > 
-    <img src="https://codecov.io/gh/humandetail/pretty-preview/branch/main/graph/badge.svg?token=5X0OFEAMK3"/> 
+  <a href="https://codecov.io/gh/humandetail/pretty-preview" >
+    <img src="https://codecov.io/gh/humandetail/pretty-preview/branch/main/graph/badge.svg?token=5X0OFEAMK3"/>
   </a>
   <a href="https://www.npmjs.com/package/pretty-preview">
     <img src="https://img.shields.io/npm/v/pretty-preview.svg" />
@@ -67,6 +67,7 @@ const pp = new PrettyPreview({
 |selector|string|'img'|The element to listen on.|
 |srcAttr|string|'src'|The property that need to be collected from the selector|
 |useMask|boolean|true|-|
+|loop|boolean|false|Enable infinite loop switching between pictures|
 
 ## License
 
