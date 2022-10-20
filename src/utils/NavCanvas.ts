@@ -192,19 +192,13 @@ export default class NavCanvas {
 
     this.startPosition = [clientX, clientY]
 
-    const onMousemove = (e: MouseEvent): void => {
-      this.handleMousemove(e)
-    }
+    const onMouseMove = this.handleMousemove.bind(this)
 
-    const onMouseup = (e: MouseEvent): void => {
+    document.addEventListener('mousemove', onMouseMove, false)
+    document.addEventListener('mouseup', (e: MouseEvent) => {
       this.handleMouseup(e)
-
-      document.removeEventListener('mousemove', onMousemove, false)
-      document.removeEventListener('mouseup', onMouseup, false)
-    }
-
-    document.addEventListener('mousemove', onMousemove, false)
-    document.addEventListener('mouseup', onMouseup, false)
+      document.removeEventListener('mousemove', onMouseMove, false)
+    }, { capture: false, once: true })
   }
 
   handleMousemove (e: MouseEvent): void {
