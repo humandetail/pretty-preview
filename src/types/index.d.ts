@@ -3,6 +3,7 @@ export interface PrettyPreviewOptions {
   selector?: string
   srcAttr?: string
   useMask?: boolean
+  loop?: boolean
 }
 
 export type Size = [number, number]

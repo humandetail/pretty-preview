@@ -4,6 +4,7 @@ import { createBtn, createElement } from './utils/dom'
 import { Position, PrettyPreviewOptions, Size, State } from './types'
 
 class PrettyPreview {
+  private readonly loop: boolean
   private readonly rootEl: HTMLElement
   private readonly previewSrcList: string[] = []
   private readonly imgs: HTMLElement[] = []
@@ -33,7 +34,8 @@ class PrettyPreview {
     const {
       root = document.body,
       selector = 'img',
-      srcAttr = 'src'
+      srcAttr = 'src',
+      loop = true
     } = options
 
     const rootEl = typeof root === 'string'
@@ -46,6 +48,7 @@ class PrettyPreview {
     }
 
     this.rootEl = rootEl as HTMLElement
+    this.loop = loop
 
     const imgs = this.rootEl.querySelectorAll<HTMLElement>(selector)
 
@@ -79,11 +82,11 @@ class PrettyPreview {
       const oSwitchLeftBtn = document.querySelector(`.${CLASS_NAME['btn-switch-left']}`)
       const oSwitchRightBtn = document.querySelector(`.${CLASS_NAME['btn-switch-right']}`)
 
-      if (oSwitchLeftBtn) {
+      if (!this.loop && oSwitchLeftBtn) {
         oSwitchLeftBtn.classList[index <= 0 ? 'add' : 'remove'](`${CLASS_NAME['btn-switch-disabled']}`)
       }
 
-      if (oSwitchRightBtn) {
+      if (!this.loop && oSwitchRightBtn) {
         oSwitchRightBtn.classList[index >= (previewSrcList.length - 1) ? 'add' : 'remove'](`${CLASS_NAME['btn-switch-disabled']}`)
       }
 
@@ -343,23 +346,39 @@ class PrettyPreview {
     }
   }
 
-  handleSwitchBtnClick (type: 'left' | 'right'): void {
-    let { idx } = this
-    const { previewSrcList } = this
-    switch (type) {
-      case 'left':
-        idx -= 1
-        break
-      case 'right':
-        idx += 1
-        break
-      default:
-        break
+  handleSwitchBtnClick (type: 'left' | 'right'): () => void {
+    if (this.loop) {
+      return () => {
+        const { idx } = this
+        const previewSrcListLength = this.previewSrcList.length
+        const value = type === 'left' ? -1 : 1
+
+        if (idx + value < 0) {
+          this.idx = previewSrcListLength - 1
+        } else if (idx + value >= previewSrcListLength) {
+          this.idx = 0
+        } else {
+          this.idx += value
+        }
+      }
     }
 
-    idx = Math.min(previewSrcList.length - 1, Math.max(0, idx))
+    return () => {
+      let { idx } = this
 
-    this.idx = idx
+      switch (type) {
+        case 'left':
+          idx -= 1
+          break
+        case 'right':
+          idx += 1
+          break
+        default:
+          break
+      }
+
+      this.idx = Math.min(this.previewSrcList.length - 1, Math.max(0, idx))
+    }
   }
 
   handleOperationsBtnClick (e: MouseEvent): void {
@@ -517,8 +536,8 @@ class PrettyPreview {
     container.appendChild(oBody)
 
     oCloseBtn.addEventListener('click', this.handleCloseBtnClick.bind(this), false)
-    oSwitchLeftBtn.addEventListener('click', this.handleSwitchBtnClick.bind(this, 'left'), false)
-    oSwitchRightBtn.addEventListener('click', this.handleSwitchBtnClick.bind(this, 'right'), false)
+    oSwitchLeftBtn.addEventListener('click', this.handleSwitchBtnClick('left'), false)
+    oSwitchRightBtn.addEventListener('click', this.handleSwitchBtnClick('right'), false)
   }
 
   createCanvas (container: HTMLDivElement): void {
