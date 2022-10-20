@@ -35,7 +35,7 @@ class PrettyPreview {
       root = document.body,
       selector = 'img',
       srcAttr = 'src',
-      loop = true
+      loop = false
     } = options
 
     const rootEl = typeof root === 'string'
