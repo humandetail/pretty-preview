@@ -373,8 +373,6 @@ class PrettyPreview {
         case 'right':
           idx += 1
           break
-        default:
-          break
       }
 
       this.idx = Math.min(this.previewSrcList.length - 1, Math.max(0, idx))
@@ -384,9 +382,7 @@ class PrettyPreview {
   handleOperationsBtnClick (e: MouseEvent): void {
     const target = e.target as HTMLElement
 
-    if (target.classList.contains(`${CLASS_NAME.operations}`)) {
-      return
-    }
+    if (target.classList.contains(`${CLASS_NAME.operations}`)) { return }
 
     let btn: HTMLElement | null = target
     while (btn && !btn.classList.contains(`${CLASS_NAME.btn}`)) {
@@ -447,18 +443,13 @@ class PrettyPreview {
     const { clientX, clientY } = e
     this.startPosition = [clientX, clientY]
 
-    const onMousemove = (e: MouseEvent): void => {
-      this.handleMousemove(e)
-    }
-
-    const onMouseup = (e: MouseEvent): void => {
-      this.handleMouseup(e)
-      document.removeEventListener('mousemove', onMousemove, false)
-      document.removeEventListener('mouseup', onMouseup, false)
-    }
+    const onMousemove = this.handleMousemove.bind(this)
 
     document.addEventListener('mousemove', onMousemove, false)
-    document.addEventListener('mouseup', onMouseup, false)
+    document.addEventListener('mouseup', (e: MouseEvent) => {
+      this.handleMouseup(e)
+      document.removeEventListener('mousemove', onMousemove, false)
+    }, { capture: false, once: true })
   }
 
   handleMousemove (e: MouseEvent): void {
