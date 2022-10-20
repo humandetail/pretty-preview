@@ -217,9 +217,9 @@ describe('PrettyPreview', () => {
   })
 
   it('The function `handleSwitchBtnClick` should work.', () => {
-    pp.handleSwitchBtnClick('left')
+    pp.handleSwitchBtnClick('left')()
     expect(pp.idx).toEqual(0)
-    pp.handleSwitchBtnClick('right')
+    pp.handleSwitchBtnClick('right')()
     expect(pp.idx).toEqual(1)
   })
 
