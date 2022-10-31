@@ -43,7 +43,8 @@
     "build:style": "sass src/assets/styles/index.scss:dist/pretty-preview.css --style=expanded --no-source-map",
     "preview": "vite preview",
     "prepare": "husky install",
-    "codecov": "codecov"
+    "codecov": "codecov",
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.1.2",
