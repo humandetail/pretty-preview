@@ -1,7 +1,7 @@
 {
   "name": "pretty-preview",
   "private": false,
-  "version": "1.1.1",
+  "version": "1.1.2",
   "author": "humandetail",
   "keywords": [
     "pretty",
@@ -18,7 +18,7 @@
   "files": [
     "dist/*"
   ],
-  "types": "src/index.ts",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/pretty-preview.js"
