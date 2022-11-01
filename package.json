@@ -15,7 +15,9 @@
   "main": "dist/pretty-preview.js",
   "browser": "dist/pretty-preview.js",
   "module": "dist/pretty-preview.js",
-  "files": ["dist/*"],
+  "files": [
+    "dist/*"
+  ],
   "types": "src/index.ts",
   "exports": {
     ".": {
@@ -69,6 +71,7 @@
     "sass": "^1.55.0",
     "typescript": "*",
     "vite": "^3.1.0",
+    "vite-plugin-dts": "^1.6.1",
     "vitest": "^0.24.0"
   },
   "lint-staged": {
