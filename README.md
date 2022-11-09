@@ -24,6 +24,10 @@
   </a>
 </p>
 
+## Project Activity
+
+![Project Activity](https://repobeats.axiom.co/api/embed/b8a418e53edc5bf4f39de27f5352cd6a193699a3.svg "Repobeats analytics image")
+
 ## Demo
 
 [demo](https://humandetail.github.io/pretty-preview/)
