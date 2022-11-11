@@ -58,7 +58,7 @@ pnpm add pretty-preview
 import PrettyPreview from 'pretty-preview'
 import 'pretty-preview/index.css'
 
-const pp = new PrettyPreview({
+new PrettyPreview({
   root: '.wrapper'
 })
 ```
