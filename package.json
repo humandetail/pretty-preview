@@ -1,87 +1,44 @@
 {
   "name": "pretty-preview",
-  "private": false,
-  "version": "1.1.2",
-  "author": "humandetail",
-  "keywords": [
-    "pretty",
-    "preview",
-    "image",
-    "ui",
-    "typescript"
-  ],
-  "description": "A pretty image preview for browser",
+  "private": true,
+  "version": "0.0.0",
   "type": "module",
-  "main": "dist/pretty-preview.js",
-  "browser": "dist/pretty-preview.js",
-  "module": "dist/pretty-preview.js",
-  "files": [
-    "dist/*"
-  ],
-  "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/pretty-preview.js"
-    },
-    "./index.css": "./dist/pretty-preview.css"
-  },
-  "unpkg": "dist/pretty-preview.js",
-  "jsdelivr": "dist/pretty-preview.js",
-  "homepage": "https://github.com/humandetail/pretty-preview",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/humandetail/pretty-preview"
-  },
-  "bugs": {
-    "url": "https://github.com/humandetail/pretty-preview/issues"
-  },
-  "license": "MIT",
   "scripts": {
-    "dev:core": "vite build --watch",
-    "dev:example": "cd example && npm run dev",
+    "dev:core": "pnpm --filter ./packages/core build:dev --watch",
+    "dev:example": "pnpm --filter ./packages/example dev",
     "dev": "concurrently \"pnpm run dev:core\" \"pnpm run dev:example\"",
-    "test": "vitest run",
-    "coverage": "vitest run --coverage",
-    "build": "tsc && vite build && pnpm run build:style",
-    "build:style": "sass src/assets/styles/index.scss:dist/pretty-preview.css --style=expanded --no-source-map",
-    "preview": "vite preview",
-    "prepare": "husky install",
-    "codecov": "codecov",
-    "prepublishOnly": "npm run build"
+    "build": "pnpm --filter ./packages/core build",
+    "build:example": "pnpm --filter ./packages/example build",
+    "release": "pnpm --filter ./packages/core release",
+    "test": "pnpm --filter ./packages/core test",
+    "coverage": "pnpm --filter ./packages/core coverage",
+    "codecov": "pnpm --filter ./packages/core codecov",
+    "lint": "lint-staged"
   },
   "devDependencies": {
-    "@commitlint/cli": "^17.1.2",
-    "@commitlint/config-conventional": "^17.1.0",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5",
-    "@vitest/coverage-c8": "^0.24.0",
-    "codecov": "^3.8.3",
-    "commitizen": "^4.2.5",
-    "concurrently": "^8.2.0",
+    "@commitlint/cli": "^17.7.1",
+    "@commitlint/config-conventional": "^17.7.0",
+    "@typescript-eslint/eslint-plugin": "^5.52.0",
+    "@typescript-eslint/parser": "^6.3.0",
+    "commitizen": "^4.3.0",
+    "concurrently": "^8.2.1",
     "cz-conventional-changelog": "^3.3.0",
-    "cz-customizable": "^7.0.0",
     "eslint": "^8.0.1",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-config-standard-with-typescript": "^23.0.0",
+    "eslint-config-standard-with-typescript": "^37.0.0",
     "eslint-plugin-import": "^2.25.2",
-    "eslint-plugin-n": "^15.0.0",
-    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-n": "^15.0.0 || ^16.0.0 ",
     "eslint-plugin-promise": "^6.0.0",
-    "happy-dom": "^7.4.0",
-    "husky": "^8.0.0",
-    "lint-staged": "^13.0.3",
-    "sass": "^1.55.0",
-    "typescript": "*",
-    "vite": "^3.1.0",
-    "vite-plugin-dts": "^1.6.1",
-    "vitest": "^0.24.0"
+    "husky": "^7.0.0",
+    "lint-staged": "^14.0.1",
+    "typescript": "^5.0.2",
+    "vite": "^4.4.5"
   },
   "lint-staged": {
-    "src/**/*.ts": "eslint --fix"
+    "*.{vue,js,ts}": "eslint --fix"
   },
   "config": {
     "commitizen": {
-      "path": "./node_modules/cz-customizable"
+      "path": "./node_modules/cz-conventional-changelog"
     }
   }
 }

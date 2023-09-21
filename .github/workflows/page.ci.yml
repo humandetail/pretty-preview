@@ -1,4 +1,4 @@
-# Simple workflow for deploying static content to GitHub Pages
+# Deploying static content to GitHub Pages
 name: ci
 
 on:
@@ -34,17 +34,17 @@ jobs:
         uses: pnpm/action-setup@v2.0.1
         with:
           version: 7.13.4
-      - name: Build PrettyPreview
-        run: pwd && npm i && npm run build
+      - name: Build Core
+        run: pnpm --filter ./packages/core install && pnpm build
       - name: Build example
-        run: cd ./example && pnpm install && pnpm run build
+        run: pnpm --filter ./packages/example install && pnpm build:example
       - name: Setup Pages
         uses: actions/configure-pages@v2
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
           # Upload entire repository
-          path: './example/dist'
+          path: './packages/example/dist'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1
