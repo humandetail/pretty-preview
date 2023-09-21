@@ -1,0 +1,61 @@
+{
+  "name": "pretty-preview",
+  "private": false,
+  "version": "1.1.2",
+  "author": "humandetail",
+  "keywords": [
+    "pretty",
+    "preview",
+    "image",
+    "ui",
+    "typescript"
+  ],
+  "description": "A pretty image preview for browser",
+  "type": "module",
+  "main": "dist/pretty-preview.js",
+  "browser": "dist/pretty-preview.js",
+  "module": "dist/pretty-preview.js",
+  "files": [
+    "dist/*"
+  ],
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/pretty-preview.js"
+    },
+    "./index.css": "./dist/style.css"
+  },
+  "unpkg": "dist/pretty-preview.js",
+  "jsdelivr": "dist/pretty-preview.js",
+  "homepage": "https://github.com/humandetail/pretty-preview",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/humandetail/pretty-preview"
+  },
+  "bugs": {
+    "url": "https://github.com/humandetail/pretty-preview/issues"
+  },
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "test": "vitest run",
+    "coverage": "vitest run --coverage",
+    "build": "tsc && vite build",
+    "build:dev": "pnpm run build --mode development",
+    "preview": "vite preview",
+    "codecov": "codecov",
+    "release": "release-it"
+  },
+  "devDependencies": {
+    "@release-it/conventional-changelog": "^5.1.1",
+    "@vitest/coverage-v8": "^0.34.4",
+    "codecov": "^3.8.3",
+    "happy-dom": "^12.1.5",
+    "release-it": "^15.10.3",
+    "sass": "^1.55.0",
+    "typescript": "^5.0.4",
+    "vite": "^4.2.0",
+    "vite-plugin-dts": "^2.3.0",
+    "vitest": "^0.34.4"
+  }
+}

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { createTemplate, mockCanvas } from './helper'
-import PrettyPreview from '../src'
-import { CLASS_NAME, PREFIX } from '../src/config/constants'
+import PrettyPreview from '../'
+import { CLASS_NAME, PREFIX } from '../config/constants'
 
 describe('PrettyPreview', () => {
   mockCanvas()
@@ -186,7 +186,7 @@ describe('PrettyPreview', () => {
     expect(pp.currentState.angle).toEqual(90)
     expect(pp.currentState.position).toEqual([100, 50])
     pp.idx = 1
-    void Promise.resolve().then(() => {
+    Promise.resolve().then(() => {
       expect(pp.wrapperPosition).toEqual([0, 0])
       expect(pp.currentState.img).toEqual('https://img-squad-prod.humandetail.com/inner/20220601rQeMejlR.png')
     })

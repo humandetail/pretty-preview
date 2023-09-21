@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { CLASS_NAME } from '../src/config/constants'
-import { State } from '../src/types'
-import NavCanvas from '../src/utils/NavCanvas'
+import { CLASS_NAME } from '../config/constants'
+import { type State } from '../types'
+import NavCanvas from '../utils/NavCanvas'
 import { mockCanvas } from './helper'
 
 describe('NavCanvas', () => {

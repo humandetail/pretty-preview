@@ -1,5 +1,5 @@
 import { createElement } from './dom'
-import { Position, Size, State } from '../types'
+import { type Position, type Size, type State } from '../types'
 import { CLASS_NAME } from '../config/constants'
 
 export default class NavCanvas {

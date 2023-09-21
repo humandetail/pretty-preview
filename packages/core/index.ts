@@ -1,7 +1,8 @@
 import { CLASS_NAME } from './config/constants'
 import NavCanvas from './utils/NavCanvas'
 import { createBtn, createElement } from './utils/dom'
-import { Position, PrettyPreviewOptions, Size, State } from './types'
+import { type Position, type PrettyPreviewOptions, type Size, type State } from './types'
+import './assets/styles/index.scss'
 
 class PrettyPreview {
   private readonly loop: boolean
@@ -78,7 +79,7 @@ class PrettyPreview {
 
     this.#idx = index
 
-    void Promise.resolve().then(() => {
+    Promise.resolve().then(() => {
       const oSwitchLeftBtn = document.querySelector(`.${CLASS_NAME['btn-switch-left']}`)
       const oSwitchRightBtn = document.querySelector(`.${CLASS_NAME['btn-switch-right']}`)
 
@@ -138,11 +139,11 @@ class PrettyPreview {
 
     oScaleBtns.forEach(btn => {
       if (btn.classList.contains(`${CLASS_NAME['btn-scale-to-large']}`)) {
-        void Promise.resolve().then(() => {
+        Promise.resolve().then(() => {
           (btn as HTMLElement).style.cssText = bool ? 'display: none' : ''
         })
       } else {
-        void Promise.resolve().then(() => {
+        Promise.resolve().then(() => {
           (btn as HTMLElement).style.cssText = bool ? '' : 'display: none'
         })
       }

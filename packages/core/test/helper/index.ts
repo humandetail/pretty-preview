@@ -17,6 +17,7 @@ export const createTemplate = (doc: Document): void => {
 export const mockCanvas = (): void => {
   const createElement = document.createElement.bind(document)
 
+  // eslint-disable-next-line no-undef
   document.createElement = <K extends keyof HTMLElementTagNameMap>(tagName: K, options?: ElementCreationOptions | undefined): HTMLElementTagNameMap[K] => {
     const oElem = createElement(tagName, options)
     // Provide getContext() to unit test.
